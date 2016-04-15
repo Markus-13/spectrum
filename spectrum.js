@@ -129,15 +129,24 @@
             "</div>"
         ].join("");
     })();
+    
+    //check only r,g,b without alpha
+    function chkRGBonly(a,b){
+        if( (!a)||(!b) ) return false;
+        var c1=tinycolor(a).toRgb;
+        var c2=tinycolor(b).toRgb;
+        return( (c1.r==c2.r)&&(c1.g==c2.g)&&(c1.b==c2.b) );
+    }
 
     function paletteTemplate (p, color, className, opts) {
         var html = [];
+        var equalzr = (opts.showPaletteOnly && opts.showAlpha) ? chkRGBonly : tinycolor.equals;
         for (var i = 0; i < p.length; i++) {
             var current = p[i];
             if(current) {
                 var tiny = tinycolor(current);
                 var c = tiny.toHsl().l < 0.5 ? "sp-thumb-el sp-thumb-dark" : "sp-thumb-el sp-thumb-light";
-                c += (tinycolor.equals(color, current)) ? " sp-thumb-active" : "";
+                c += (equalzr(color, current)) ? " sp-thumb-active" : "";
                 var formattedString = tiny.toString(opts.preferredFormat || "rgb");
                 var swatchStyle = rgbaSupport ? ("background-color:" + tiny.toRgbString()) : "filter:" + tiny.toFilter();
                 html.push('<span title="' + formattedString + '" data-color="' + tiny.toRgbString() + '" class="' + c + '"><span class="sp-thumb-inner" style="' + swatchStyle + ';" /></span>');
@@ -384,6 +393,9 @@
                 applyOptions();
             });
 
+            if(opts.showPaletteOnly && opts.showAlpha) {
+                alphaSlider.appendTo(paletteContainer);
+            }
             draggable(alphaSlider, function (dragX, dragY, e) {
                 currentAlpha = (dragX / alphaWidth);
                 isEmpty = false;
